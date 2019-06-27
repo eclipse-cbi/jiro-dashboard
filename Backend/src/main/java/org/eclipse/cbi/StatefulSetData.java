@@ -1,21 +1,14 @@
 package org.eclipse.cbi;
 
 public class StatefulSetData {
-    private String name ;
-    private String uid ;
-    private int replicas ;
-    private int readyReplicas ;
+    private String name ; 
+    private String uid ; 
+    private int replicas ; // Number of pods as defined in the Spec
+    private int readyReplicas ; // Number of pods in running condition
     
-    public String getName() {
-        return(name);
-    }
+    // Structure for storing the information about the statefulsets retrieved from Watch 
+
     public String getUid() {
-        return(uid);    
-    }
-    public String getReplicas() {
-        return(name);
-    }
-    public String getReadyReplicas() {
         return(uid);    
     }
 

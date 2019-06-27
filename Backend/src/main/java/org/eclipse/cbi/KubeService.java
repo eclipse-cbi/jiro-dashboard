@@ -14,38 +14,49 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import javax.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 class KubeService {
    
     private ApiClient client = null ;
-    private static List<StatefulSetData> data = new ArrayList<>(); 
-    private static String resVersion = null ; 
-    private Boolean watching = false ;
-    public static final String label = "org.eclipse.cbi.jiro/kind=master";
-    Watch<V1StatefulSet> watch ;
+    private List<StatefulSetData> data = new ArrayList<>(); // Stores all the statefulset data retrieved from the Cluster
+    private String resVersion = null ;
+    public final String label = "org.eclipse.cbi.jiro/kind=master";
+    private Watch<V1StatefulSet> watch ;
 
     public void setApiClient(ApiClient client) {
         this.client = client ;
     }
 
+
     public void watchStatefulSets() throws ApiException {
         System.out.println("WatchStatefulSets");
-        watching = true ;
         client.getHttpClient().setReadTimeout(0,TimeUnit.SECONDS);
         Configuration.setDefaultApiClient(client);
         AppsV1Api apiInstance = new AppsV1Api(); 
-
+        
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                         System.out.println("Creating Watch ");
                         watch =  Watch.createWatch( client,
-                        apiInstance.listStatefulSetForAllNamespacesCall(null,null,false,label,null,null,resVersion,null , true, null,null),
-                        new TypeToken<Watch.Response<V1StatefulSet>>() {}.getType());
+                        apiInstance.listStatefulSetForAllNamespacesCall(null,null,false,label,null,null,resVersion,null , true, null,null), // Tells the watch what to watch  
+                        new TypeToken<Watch.Response<V1StatefulSet>>() {}.getType() ); // Response type we need the watch to return
                 } catch(ApiException e) {
                      System.out.println(e); 
                 }
+                /*
+                    The Response object returned by the watch contains items which have been Added,Deleted or Modified 
+                    Basically the response object have -
+                     type - Which Tells about the type of operation for the Object (StatefulSet) i.e.
+                                1) Added 
+                                2) Deleted 
+                                3) Modified 
+                                4) Error   
+                    object - Which contains the object (StatefulSet) 
+                */
                 for(Watch.Response<V1StatefulSet> item : watch) {
                    V1ObjectMeta itemMeta = item.object.getMetadata();
                    V1StatefulSetStatus itemStatus = item.object.getStatus();
@@ -56,7 +67,15 @@ class KubeService {
                             obj.setName(itemMeta.getName());
                             obj.setUid(itemMeta.getUid());
                             obj.setReplicas(itemStatus.getReplicas());
-                            obj.setReadyReplicas(itemStatus.getReadyReplicas());
+
+                            /* Whenever a new StatefulSet is Created it takes time for the pods 
+                               to be in ready  condition till that time this field remains null  */
+
+                            try { 
+                                obj.setReadyReplicas(itemStatus.getReadyReplicas());
+                            } catch (NullPointerException ex) {
+                                obj.setReadyReplicas(0);
+                            } 
                             data.add(obj);
                         }
                         break;
@@ -72,7 +91,11 @@ class KubeService {
                             }
                             obj.setName(itemMeta.getName());
                             obj.setReplicas(itemStatus.getReplicas());
-                            obj.setReadyReplicas(itemStatus.getReadyReplicas());
+                            try {
+                                obj.setReadyReplicas(itemStatus.getReadyReplicas());
+                            } catch (NullPointerException ex) {
+                                obj.setReadyReplicas(0);
+                            }
                         }
                         break;
                         case "DELETED" : {
