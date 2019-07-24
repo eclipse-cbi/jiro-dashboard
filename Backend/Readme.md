@@ -1,47 +1,22 @@
-## Using the API
+## Dashboard API
 
-  Create a Minikube Cluster or start an exisiting one using 
-  ~~~
-  Minikube Start
-  ~~~
-  Setup a proxy at port 8090 using kubectl
-  ~~~
-  Kubectl proxy --port=8090
-  ~~~
-  Start the backend server 
-  ~~~
- ./mvnw compile quarkus:dev
-  ~~~
-  The jenkins endpoint can be accessed at http://localhost:8080/jenkins
-
-## Setting up Minikube
-  Everything below has been taken from this setup guide https://kubernetes.io/docs/tasks/tools/install-minikube/
-  ### Install Kubectl
-  Download the latest release 
-  ~~~~
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-  ~~~~
-  Make the kubectl binary executable
-  ~~~~
-  chmod +x ./kubectl
-  ~~~~
-  Move the binary in to your PATH
-  ~~~~
-  sudo mv ./kubectl /usr/local/bin/kubectl
-  ~~~~ 
-  ### Install Hypervisor
-  If you do not already have a hypervisor installed, install one of these now
-  - [KVM](https://www.linux-kvm.org/page/Main_Page), which also uses QEMU
-  - [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
-  ### Install Minikube
-  - Install Minikube using a package
-    https://github.com/kubernetes/minikube/releases
-    
-  - Install Minikube via direct download
-    ~~~~
-    curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
-    && chmod +x minikube
-    ~~~~
-    
+  The API can be accessed at http://35.232.118.38:8080
   
+  __Enpoints__
+   * /jenkins  - Displays the data in format [name , id , total replicas/ready replicas]
+   * /jenkins/name/ - Display the jenkins version
+   
+## Cluster Overview 
+
+ The cluster can be accessed at :
  
+ https://console.cloud.google.com/kubernetes/workload?project=mystical-magnet-238515&workload_list_tablesize=50
+
+  ![k8_arch.png](https://drive.google.com/uc?export=download&id=1jF9i8Bk5sCr5ZBTt0OOfnUzr9swcdvDv)
+  
+  __Jiro-dashboard__ is used for working and testing the api inside the cluster whereas __Jiro-dashboard-run__ is running the containerized app 
+
+
+1. [__Jenkins API Client__](https://github.com/jenkinsci/java-client-api)
+2. [__Kubernetes API CLient__](https://github.com/kubernetes-client/java)
+  
